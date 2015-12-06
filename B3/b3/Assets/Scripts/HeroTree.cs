@@ -18,7 +18,8 @@ public class HeroTree : MonoBehaviour {
     public GameObject Hero;
     public GameObject Princess;
     public GameObject OldMan;
-    public Transform IntermediatePoint;
+    public Transform Marker1;
+    //public Transform IntermediatePoint;
     //public Text ThinkOfPrincess;
 
 
@@ -36,6 +37,8 @@ public class HeroTree : MonoBehaviour {
 
         //whichArc = (int)Random.Range(1, 5);
         whichArc = 1;
+        print("Arc Selected: " + whichArc);
+
 	}
 	
 	// Update is called once per frame
@@ -51,9 +54,18 @@ public class HeroTree : MonoBehaviour {
     protected Node HeroTreeRoot()
     {
         Sequence Arc = new Sequence(                                                                         
-            ThinkAboutPrincess() , GoToPrincess(), HeroWaveAt(Princess), PrincessOrientTo(Hero), PrincessWaveAt(Hero), FirstEncounter(), ST_GoToInter(IntermediatePoint), PickArc());
+                this.ThinkAboutPrincess(),
+                this.GoToPrincess(), 
+                this.HeroWaveAt(this.Princess),
+                this.PrincessOrientTo(this.Hero),
+                this.PrincessWaveAt(this.Hero),
+                this.FirstEncounter());
 
-        return Arc;
+        Sequence newArc = new Sequence(
+            this.ST_GoToInter(this.Marker1),
+            this.PickArc());
+
+        return new Sequence(Arc, newArc);
     }
 
 
@@ -141,8 +153,8 @@ public class HeroTree : MonoBehaviour {
     //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
     protected Node ST_GoToInter(Transform target)
     {
-        Val<Vector3> Inter = Val.V(() => target.position);
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(Inter));
+        Val<Vector3> position = Val.V(() => target.position);
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(position));
     }
     //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
     //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
@@ -153,7 +165,10 @@ public class HeroTree : MonoBehaviour {
     //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
 
 
-
+    protected Node ST_GoToMarker()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(Marker1.position));
+    }
 
     #region
     //
@@ -170,7 +185,7 @@ public class HeroTree : MonoBehaviour {
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Cheer", 4000)
             );
         
-        return HandP;
+        return new DecoratorForceStatus(RunStatus.Success, HandP);
     }
 
     protected Node TalkPrincess()
@@ -182,8 +197,8 @@ public class HeroTree : MonoBehaviour {
             Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("ReachingRight", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("LookAway", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Think", 4000),
-            Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("HeadNod", 4000),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("HeadNod", 4000),
+            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadNod", 4000),
+            Hero.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadNod", 4000),
             Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Writing", 4000)
             );
 
@@ -195,14 +210,14 @@ public class HeroTree : MonoBehaviour {
         return new Sequence();
     }
 
+    #endregion
+
+
+
     protected Node FindNote()
     {
         return new Sequence();
     }
-
-
-    #endregion
-
 
 
 
