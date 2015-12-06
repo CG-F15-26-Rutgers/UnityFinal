@@ -237,12 +237,16 @@
     <Compile Include="Assets\KADAPT\Assets\Core\Scripts\Util\Tuple.cs" />
     <Compile Include="Assets\KADAPT\Assets\MyBehaviorTree.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\HeroTree.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
     <Compile Include="Assets\Scripts\PersonController.cs" />
     <Compile Include="Assets\Scripts\RotateItem.cs" />
+    <Compile Include="Assets\Scripts\WhichCamera.cs" />
     <Compile Include="Assets\Textures\Fantasy Skybox FREE\Scripts\FSPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Fonts\license.txt" />
+    <None Include="Assets\Fonts\readme.txt" />
     <None Include="Assets\KADAPT\ProjectSettings\ProjectVersion.txt" />
     <None Include="Assets\Modular Backdrop Builds\Discription.txt" />
     <None Include="Assets\PowerUps Vol 1 Free\Readme.txt" />
