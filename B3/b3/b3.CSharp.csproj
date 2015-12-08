@@ -241,7 +241,6 @@
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
     <Compile Include="Assets\Scripts\PersonController.cs" />
     <Compile Include="Assets\Scripts\RotateItem.cs" />
-    <Compile Include="Assets\Scripts\WhichCamera.cs" />
     <Compile Include="Assets\Textures\Fantasy Skybox FREE\Scripts\FSPlayer.cs" />
   </ItemGroup>
   <ItemGroup>

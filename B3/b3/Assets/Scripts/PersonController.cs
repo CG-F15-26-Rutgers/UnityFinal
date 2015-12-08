@@ -6,7 +6,6 @@ public class PersonController : MonoBehaviour
 {
     //public Animation Walk;
 
-    private bool nonInteractive = true;
     private float moveSpeed = 5.0f;
     private float rotateSpeed = 3.0f;
 
@@ -18,12 +17,6 @@ public class PersonController : MonoBehaviour
 
     void Update()
     {
-        if(nonInteractive)
-        {
-
-        }
-        else
-        {
             CharacterController control = GetComponent<CharacterController>();
             transform.Rotate(0, Input.GetAxis("Horizontal") * rotateSpeed, 0);
 
@@ -39,9 +32,6 @@ public class PersonController : MonoBehaviour
             {
                 // Walk.CrossFade("Idle");
             }
-        }
-        
-
     }
 
 }

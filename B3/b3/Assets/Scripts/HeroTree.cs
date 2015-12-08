@@ -4,24 +4,14 @@ using TreeSharpPlus;
 using UnityEngine.UI;
 
 
-
-//FUCK MECANIM
-//FUCK UNITY
-//NOTHING WORKS
-//NOTHING MAKES SENSE
-//FUCK KADAPT
-//ANIMATIONS NEVER RUN HOW THEYRE SUPPOSED TO
-
-
 public class HeroTree : MonoBehaviour {
 
     public GameObject Hero;
     public GameObject Princess;
     public GameObject OldMan;
-    public Transform Marker1;
+    public GameObject Building;
     //public Transform IntermediatePoint;
     //public Text ThinkOfPrincess;
-
 
 
     private BehaviorAgent agent;
@@ -29,15 +19,15 @@ public class HeroTree : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        //ThinkOfPrincess.text = "";
-
+        //whichArc = (int)Random.Range(1, 5);
+        //ThinkOfPrincess.text = ""; 
+        whichArc = 1;
+        Debug.Log("Arc Selected: " + whichArc);
         agent = new BehaviorAgent(this.HeroTreeRoot());
         BehaviorManager.Instance.Register(agent);
         agent.StartBehavior();
 
-        //whichArc = (int)Random.Range(1, 5);
-        whichArc = 1;
-        print("Arc Selected: " + whichArc);
+       
 
 	}
 	
@@ -53,26 +43,36 @@ public class HeroTree : MonoBehaviour {
     //
     protected Node HeroTreeRoot()
     {
-        Sequence Arc = new Sequence(                                                                         
+       return new DecoratorLoop(
+             new Sequence(                                                                         
                 this.ThinkAboutPrincess(),
-                this.GoToPrincess(), 
+                this.GoToPrincess(),
                 this.HeroWaveAt(this.Princess),
                 this.PrincessOrientTo(this.Hero),
                 this.PrincessWaveAt(this.Hero),
-                this.FirstEncounter());
+                this.FirstEncounter(),
+                this.PrincessOrientTo(this.OldMan),
+                this.PrincessWaveAt(this.OldMan),
 
-        Sequence newArc = new Sequence(
-            this.ST_GoToInter(this.Marker1),
-            this.PickArc());
 
-        return new Sequence(Arc, newArc);
+                //PEOPLE WONT MOVE TO A NEW LOCATION BUT THEY WILL DO OTHER THINGS
+                //Want this to work
+                //Show this to Mahyar, this part
+                this.GoToBuilding(this.Building.transform),
+                //Tick on non running node, but this SHOULD NOT HAPPEN 
+                //I dont know why this happens...
+
+
+                this.ThinkAboutPrincess(),
+                this.PickArc(whichArc)
+                ));
     }
 
 
 
     //--------------------------------------------------------------
-    //These are the root nodes for the four different story arcs
-    //LovePoemArc, GemArc, RocksArc, PoopArc
+    //These are the root nodes for the two different story arcs
+    //LovePoemArc, GemArc
     //--------------------------------------------------------------
     #region
     //LOVE POEM STORY ARC ROOT NODE
@@ -91,24 +91,6 @@ public class HeroTree : MonoBehaviour {
         return new Sequence();
     }
     #endregion
-
-    #region
-    //ROCKS STORY ARC ROOT NODE
-    protected Node RocksArc()
-    {
-        return new Sequence();
-
-    }
-    #endregion
-
-    #region
-    //POOP STORY ARC ROOT NODE
-    protected Node PoopArc()
-    {
-        return new Sequence();
-    }
-    #endregion
-
 
     protected Node ThinkAboutPrincess()
     {
@@ -142,32 +124,16 @@ public class HeroTree : MonoBehaviour {
 
 
 
-
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK!!!!!!!!!!!!!!!!!!!!!!!
-    protected Node ST_GoToInter(Transform target)
+    protected Node GoToBuilding(Transform target)
     {
-        Val<Vector3> position = Val.V(() => target.position);
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(position));
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(target.position, 6.0f));
     }
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!WHY DOESNT THIS FUCKING WORK IT SHOULD WORK!!!!!!!!!!!!!!!!!!!!!!!
+    
 
 
-    protected Node ST_GoToMarker()
+    protected Node PrincessGoTo(Transform target)
     {
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(Marker1.position));
+        return new Sequence(Princess.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(target.position, 5.0f));
     }
 
     #region
@@ -176,7 +142,7 @@ public class HeroTree : MonoBehaviour {
     //
     protected Node FirstEncounter()
     {
-        Sequence HandP = new Sequence(
+        return new Sequence(
             Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wonderful", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Surprised", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Shock", 4000),
@@ -185,15 +151,14 @@ public class HeroTree : MonoBehaviour {
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Cheer", 4000)
             );
         
-        return new DecoratorForceStatus(RunStatus.Success, HandP);
     }
 
     protected Node TalkPrincess()
     {
         Sequence getInfo = new Sequence(
-            GoToPrincess(),
-            HeroWaveAt(Princess),
-            PrincessWaveAt(Hero),
+            this.GoToPrincess(),
+            this.HeroWaveAt(Princess),
+            this.PrincessWaveAt(Hero),
             Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("ReachingRight", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("LookAway", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Think", 4000),
@@ -234,27 +199,12 @@ public class HeroTree : MonoBehaviour {
     //
     //Picks the sub-arc based on the random number generated after talking to the princess
     //
-    protected Node PickArc()
+    protected Node PickArc(int whichStory)
     {
-        if(whichArc == 1)
-        {
+        if(whichStory == 1)
             return new Sequence(LovePoemArc());
-        }
-
-        else if(whichArc == 2)
-        {
-            return new Sequence(GemArc());
-        }
-
-        else if(whichArc == 3)
-        {
-            return new Sequence(RocksArc());
-        }
-
         else
-        {
-            return new Sequence(PoopArc());
-        }
+            return new Sequence(GemArc());
     }
 
 
