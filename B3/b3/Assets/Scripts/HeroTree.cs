@@ -1,211 +1,236 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TreeSharpPlus;
-using UnityEngine.UI;
-
 
 public class HeroTree : MonoBehaviour {
 
     public GameObject Hero;
     public GameObject Princess;
     public GameObject OldMan;
-    public GameObject Building;
-    //public Transform IntermediatePoint;
-    //public Text ThinkOfPrincess;
+
+    public Transform princessTalkPos;
+    public Transform oldmanTalkPos;
+    public Transform marker;
 
 
-    private BehaviorAgent agent;
-    private int whichArc;
+    private BehaviorAgent heroAgent;
+
+    private bool princessInfo = false;
+    private bool oldManInfo = false;
+
 
 	// Use this for initialization
 	void Start () {
-        //whichArc = (int)Random.Range(1, 5);
-        //ThinkOfPrincess.text = ""; 
-        whichArc = 1;
-        Debug.Log("Arc Selected: " + whichArc);
-        agent = new BehaviorAgent(this.HeroTreeRoot());
-        BehaviorManager.Instance.Register(agent);
-        agent.StartBehavior();
-
-       
-
-	}
-	
-	// Update is called once per frame
-    void Update()
-    {
-
+        heroAgent = new BehaviorAgent(this.HeroTreeRoot());
+        BehaviorManager.Instance.Register(heroAgent);
+        heroAgent.StartBehavior();
     }
+	
+	void Update () {
+	
+	}
+
 
 
     //
-    //MAIN TREE ROOT
+    //Root of the Hero's Tree
     //
     protected Node HeroTreeRoot()
     {
-       return new DecoratorLoop(
-             new Sequence(                                                                         
-                this.ThinkAboutPrincess(),
-                this.GoToPrincess(),
-                this.HeroWaveAt(this.Princess),
-                this.PrincessOrientTo(this.Hero),
-                this.PrincessWaveAt(this.Hero),
-                this.FirstEncounter(),
-                this.PrincessOrientTo(this.OldMan),
-                this.PrincessWaveAt(this.OldMan),
-
-
-                //PEOPLE WONT MOVE TO A NEW LOCATION BUT THEY WILL DO OTHER THINGS
-                //Want this to work
-                //Show this to Mahyar, this part
-                this.GoToBuilding(this.Building.transform),
-                //Tick on non running node, but this SHOULD NOT HAPPEN 
-                //I dont know why this happens...
-
-
-                this.ThinkAboutPrincess(),
-                this.PickArc(whichArc)
-                ));
+        return new Sequence(
+            this.Think(),
+            this.GoToPrincess(),
+            this.HeroOrientToPrincess(),
+            this.HeroWave(),
+            this.PrincessOrientToHero(),
+            this.PrincessWave(),
+            this.FirstConversation(),
+            this.GoToMarker(),
+            this.SelectStoryArc()
+            );
     }
 
-
-
-    //--------------------------------------------------------------
-    //These are the root nodes for the two different story arcs
-    //LovePoemArc, GemArc
-    //--------------------------------------------------------------
-    #region
-    //LOVE POEM STORY ARC ROOT NODE
+    //
+    //Root of the Love Poem Arc
+    //
     protected Node LovePoemArc()
     {
-        Sequence Poem = new Sequence(ChooseInfo());
-
-        return Poem;
+        SelectorShuffle info = new SelectorShuffle(PrincessInfo(), OldGuyInfo());
+        //Sequence checkFirst = new Sequence(new LeafAssert(princessInfo));
+        return info;
     }
-    #endregion  
 
-    #region
-    //GEM STORY ARC ROOT NODE
+
+
+    //
+    //Root of the Gem Arc
+    //
     protected Node GemArc()
     {
         return new Sequence();
     }
-    #endregion
 
-    protected Node ThinkAboutPrincess()
+
+
+    #region
+    //
+    //Leaf Nodes
+    //
+    protected Node Think()
     {
         return new Sequence(Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Think", 4000));
     }
 
     protected Node GoToPrincess()
     {
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(Princess.transform.position, 2.0f));
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(princessTalkPos.position));
     }
 
-    protected Node GoToOldMan()
+    protected Node GoToOldGuy()
     {
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(OldMan.transform.position, 2.0f));
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(oldmanTalkPos.position));
     }
 
-    protected Node HeroWaveAt(GameObject person)
+    protected Node HeroOrientToPrincess()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_OrientTowards(Princess.transform.position));
+    }
+
+    protected Node HeroOrientToOldMan()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_OrientTowards(OldMan.transform.position));
+    }
+
+    protected Node HeroWave()
     {
         return new Sequence(Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 4000));
     }
 
-    protected Node PrincessWaveAt(GameObject person)
+    protected Node OldManWave()
+    {
+        return new Sequence(OldMan.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 4000));
+    }
+
+    protected Node PrincessOrientToHero()
+    {
+        return new Sequence(Princess.GetComponent<BehaviorMecanim>().Node_OrientTowards(Hero.transform.position));
+    }
+
+    protected Node OldManOrientToHero()
+    {
+        return new Sequence(OldMan.GetComponent<BehaviorMecanim>().Node_OrientTowards(Hero.transform.position));
+    }
+
+    protected Node PrincessWave()
     {
         return new Sequence(Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wave", 4000));
     }
 
-    protected Node PrincessOrientTo(GameObject person)
-    {
-        return new Sequence(Princess.GetComponent<BehaviorMecanim>().Node_OrientTowards(person.transform.position));
-    }
-
-
-
-    protected Node GoToBuilding(Transform target)
-    {
-        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(target.position, 6.0f));
-    }
-    
-
-
-    protected Node PrincessGoTo(Transform target)
-    {
-        return new Sequence(Princess.GetComponent<BehaviorMecanim>().Node_GoToUpToRadius(target.position, 5.0f));
-    }
-
-    #region
-    //
-    //CONVERSATION NODES
-    //
-    protected Node FirstEncounter()
+    protected Node FirstConversation()
     {
         return new Sequence(
             Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Wonderful", 4000),
-            Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Surprised", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Shock", 4000),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Writing", 4000),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("Acknowledge", 4000),
+            Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Surprised", 4000),
+            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadShakeThink", 4000),
+            Hero.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadNod", 4000),
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Cheer", 4000)
             );
-        
     }
 
-    protected Node TalkPrincess()
+    protected Node GoToMarker()
     {
-        Sequence getInfo = new Sequence(
-            this.GoToPrincess(),
-            this.HeroWaveAt(Princess),
-            this.PrincessWaveAt(Hero),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("ReachingRight", 4000),
-            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("LookAway", 4000),
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(marker.transform.position));
+    }
+
+    protected Node ST_GetPrincessInfo()
+    {
+        return new Sequence(
             Princess.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Think", 4000),
-            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadNod", 4000),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("HeadNod", 4000),
-            Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Writing", 4000)
+            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("Sad", 4000),
+            Princess.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("Roar", 4000)
             );
-
-        return getInfo;
     }
 
-    protected Node TalkOldMan()
+    protected Node ST_GetOldGuyInfo()
     {
-        return new Sequence();
+        return new Sequence(
+            OldMan.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Think", 4000),
+            OldMan.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("Sad", 4000),
+            OldMan.GetComponent<BehaviorMecanim>().ST_PlayFaceGesture("Roar", 4000),
+            OldMan.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("HandsUp", 4000)
+            );
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #endregion
 
 
 
-    protected Node FindNote()
+    protected Node SelectStoryArc()
     {
-        return new Sequence();
+        return new SelectorShuffle(LovePoemArc(), GemArc());
     }
 
-
-
-
-
-    protected Node ChooseInfo()
+    protected Node PrincessInfo()
     {
-        SelectorShuffle whichGuy = new SelectorShuffle(TalkPrincess() , TalkOldMan() , FindNote());
-        return whichGuy;
+        princessInfo = true;
+        return new Sequence(
+            this.GoToPrincess(),
+            this.HeroOrientToPrincess(),
+            this.HeroWave(), 
+            this.PrincessOrientToHero(),
+            this.PrincessWave(),
+            this.ST_GetPrincessInfo()
+            );
     }
 
-
-
-    //
-    //Picks the sub-arc based on the random number generated after talking to the princess
-    //
-    protected Node PickArc(int whichStory)
+    protected Node OldGuyInfo()
     {
-        if(whichStory == 1)
-            return new Sequence(LovePoemArc());
-        else
-            return new Sequence(GemArc());
+        oldManInfo = true;
+        return new Sequence(
+            this.GoToOldGuy(),
+            this.HeroOrientToOldMan(),
+            this.HeroWave(),
+            this.OldManOrientToHero(),
+            this.OldManWave(),
+            this.ST_GetOldGuyInfo()
+            );
     }
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
