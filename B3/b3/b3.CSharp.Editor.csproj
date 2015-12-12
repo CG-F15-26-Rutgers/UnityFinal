@@ -156,8 +156,6 @@
     <Compile Include="Assets\KADAPT\Assets\Core\Scripts\IK\Editor\CrossfadeLookAtIKInspector.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Fonts\license.txt" />
-    <None Include="Assets\Fonts\readme.txt" />
     <None Include="Assets\KADAPT\ProjectSettings\ProjectVersion.txt" />
     <None Include="Assets\Modular Backdrop Builds\Discription.txt" />
     <None Include="Assets\PowerUps Vol 1 Free\Readme.txt" />
