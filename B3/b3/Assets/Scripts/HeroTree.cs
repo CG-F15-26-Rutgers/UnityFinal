@@ -8,30 +8,56 @@ public class HeroTree : MonoBehaviour {
     public GameObject Hero;
     public GameObject Princess;
     public GameObject OldMan;
+    public GameObject Gate;
 
     public Transform princessTalkPos;
     public Transform oldmanTalkPos;
+    public Transform cameraPos;
+    public Transform fountainPos;
+    public Transform gateUnlockPos;
+    public Transform treasurePos;
+    public Transform gemPos;
     public Transform marker;
     public Transform noteInfoMarker;
     public Transform pickUpSlab;
     public Transform lovePoemMarker;
-    public Transform cameraPos;
 
+    public Collider trigger;
+
+    //Pick up slab
     public FullBodyBipedEffector Effector;
     public InteractionObject slab;
 
+    //Pick up poem
     public FullBodyBipedEffector EffectorTwo;
     public InteractionObject LovePoem;
 
+    //Give gifts
     public FullBodyBipedEffector EffectorThreePt1;
     public FullBodyBipedEffector EffectorThreePt2;
     public InteractionObject giftGive;
 
+    //Pick up fountain info
+    public FullBodyBipedEffector EffectorFour;
+    public InteractionObject FInfo;
+
+    //Open treasure chest
+    public FullBodyBipedEffector EffectorFive;
+    public InteractionObject treasureChest;
+
+    //Unlock gate
+    public FullBodyBipedEffector EffectorSix;
+    public InteractionObject gateLock;
+
+    //Pick up gem
+    public FullBodyBipedEffector EffectorSeven;
+    public InteractionObject Gem;
+
 
     private BehaviorAgent heroAgent;
 
-    private bool princessInfo = false;
-    private bool oldManInfo = false;
+    private bool IsGateOpen = false;
+    private bool hasGem = false;
 
 	// Use this for initialization
 	void Start () {
@@ -41,10 +67,7 @@ public class HeroTree : MonoBehaviour {
     }
 	
 	void Update () {
-	
 	}
-
-
 
     //
     //Root of the Hero's Tree
@@ -65,30 +88,39 @@ public class HeroTree : MonoBehaviour {
             );
     }
 
+    #region
+    //
+    //The Two Sub-Story Arcs
+    //
+
+
+
     //
     //Root of the Love Poem Arc
     //
     protected Node LovePoemArc()
     {
         SequenceShuffle info = new SequenceShuffle(
-            this.PrincessInfo(), 
-            this.OldGuyInfo(), 
-            this.getNoteInfo());
+            this.PrincessInfo(),
+            this.OldGuyInfo(),
+            this.getNoteInfo()
+        );
 
         Sequence cont = new Sequence(
             this.GoToMarker(),
             this.Think(), 
             this.CheckInfo(), 
-            this.Realization());
+            this.Realization()
+        );
 
         Sequence giveItToHer = new Sequence(
             this.GoToLion(),
             this.ST_PickUpLovePoem(),
             this.GoToPrincess(),
             this.HeroOrientToPrincess(), 
-            new LeafWait(1000),
+            new LeafWait(500),
             this.PrincessOrientToHero(),
-            new LeafWait(1000),
+            new LeafWait(500),
             this.GiveGift(),
             this.Celebrate()
             );
@@ -103,10 +135,43 @@ public class HeroTree : MonoBehaviour {
     //
     protected Node GemArc()
     {
-        return new Sequence();
+        SequenceShuffle info = new SequenceShuffle(
+            this.OldGuyInfo(),
+            this.getNoteInfo(),
+            this.getFountainInfo()
+            );
+
+        Sequence cont = new Sequence(
+            this.GoToMarker(),
+            this.Think(),
+            this.CheckInfo(),
+            this.Realization());
+
+        Sequence unlockGem = new Sequence(
+            this.GoToTreasure(),
+            this.ST_OpenTreasureChest(),
+            this.GoToGate(),
+            this.ST_UnlockGate(),
+            new LeafWait(500)
+            );
+
+            Sequence giveItToHer = new Sequence(
+                this.GoToGem(),
+                this.ST_PickUpGem(),
+                this.GoToPrincess(),
+                this.HeroOrientToPrincess(),
+                new LeafWait(500),
+                this.PrincessOrientToHero(),
+                new LeafWait(500),
+                this.GiveGift(),
+                this.Celebrate()
+            );
+        
+
+        return new Sequence(info, cont, unlockGem, giveItToHer);
     }
 
-
+    #endregion
 
     #region
     //
@@ -167,6 +232,22 @@ public class HeroTree : MonoBehaviour {
         return new Sequence(Hero.GetComponent<BehaviorMecanim>().ST_PlayHandGesture("Read", 5000));
     }
 
+    protected Node GoToGate()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(gateUnlockPos.position));
+    }
+
+    protected Node GoToTreasure()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(treasurePos.position));
+    }
+
+    protected Node GoToGem()
+    {
+        Val<Vector3> pos = Val.V(() => gemPos.position); 
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(pos));
+    }
+
     protected Node FirstConversation()
     {
         return new Sequence(
@@ -193,6 +274,40 @@ public class HeroTree : MonoBehaviour {
     protected Node GoToMarker()
     {
         return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(marker.transform.position));
+    }
+
+    protected Node GoToFountain()
+    {
+        return new Sequence(Hero.GetComponent<BehaviorMecanim>().Node_GoTo(fountainPos.position));
+    }
+    
+    protected Node ST_PickUpFountain()
+    {
+        Val<FullBodyBipedEffector> effecting = Val.V(() => EffectorFour);
+        Val<InteractionObject> takeFountain = Val.V(() => FInfo);
+        return new SequenceParallel(new LeafTrace("Pick Up Fountain Info"), Hero.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, takeFountain), new LeafWait(1000));
+    }
+
+    protected Node ST_PickUpGem()
+    {
+        Val<FullBodyBipedEffector> effecting = Val.V(() => EffectorSeven);
+        Val<InteractionObject> getGem = Val.V(() => Gem);
+        return new SequenceParallel(new LeafTrace("Pick Up Gem"), Hero.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, getGem), new LeafWait(1000));
+    }
+
+    protected Node ST_UnlockGate()
+    {
+        Val<FullBodyBipedEffector> effecting = Val.V(() => EffectorSix);
+        Val<InteractionObject> openGate = Val.V(() => gateLock);
+        IsGateOpen = true;
+        return new SequenceParallel(new LeafTrace("Interaction"), Hero.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, openGate));
+    }
+
+    protected Node ST_OpenTreasureChest()
+    {
+        Val<FullBodyBipedEffector> effecting = Val.V(() => EffectorFive);
+        Val<InteractionObject> openChest = Val.V(() => treasureChest);
+        return new SequenceParallel(new LeafTrace("Open Chest"), Hero.GetComponent<BehaviorMecanim>().Node_StartInteraction(effecting, openChest));
     }
 
     protected Node ST_GetPrincessInfo()
@@ -244,10 +359,6 @@ public class HeroTree : MonoBehaviour {
     {
         Val<Vector3> camPos = Val.V(() => cameraPos.position);
 
-        SequenceParallel look = new SequenceParallel(
-            Hero.GetComponent<BehaviorMecanim>().Node_OrientTowards(cameraPos.position),
-            Princess.GetComponent<BehaviorMecanim>().Node_OrientTowards(cameraPos.position));
-
         SequenceParallel lookEyeCamera = new SequenceParallel(
             Hero.GetComponent<BehaviorMecanim>().Node_HeadLook(camPos),
             Princess.GetComponent<BehaviorMecanim>().Node_HeadLook(camPos));
@@ -261,7 +372,7 @@ public class HeroTree : MonoBehaviour {
             this.PrincessWave()
             );
 
-        return new Sequence(new LeafWait(500), look, new LeafWait(500), lookEyeCamera, new LeafWait(500), dance, new LeafWait(500), goodbye);
+        return new Sequence(new LeafWait(500), lookEyeCamera, new LeafWait(500), dance, new LeafWait(500), goodbye);
     }
 
     protected Node GoToLion()
@@ -271,16 +382,12 @@ public class HeroTree : MonoBehaviour {
 
     #endregion
 
-
-
-    protected Node SelectStoryArc()
-    {
-        return new SelectorShuffle(LovePoemArc());
-    }
-
+    #region
+    //
+    //Gathering Info Nodes
+    //
     protected Node PrincessInfo()
     {
-        princessInfo = true;
         return new Sequence(
             this.GoToPrincess(),
             this.HeroOrientToPrincess(),
@@ -293,7 +400,6 @@ public class HeroTree : MonoBehaviour {
 
     protected Node OldGuyInfo()
     {
-        oldManInfo = true;
         return new Sequence(
             this.GoToOldGuy(),
             this.HeroOrientToOldMan(),
@@ -311,24 +417,27 @@ public class HeroTree : MonoBehaviour {
             this.ST_PickUpTablet()
             );
     }
-    
 
+    protected Node getFountainInfo()
+    {
+        return new Sequence(
+            this.GoToFountain(),
+            this.ST_PickUpFountain()
+            );
+    }
 
+    #endregion
 
+    protected Node SelectStoryArc()
+    {
+        return new SelectorShuffle(LovePoemArc(), GemArc());
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    void OnTriggerEnter(Collider trigger)
+    {
+        Vector3 NewGatePos = Gate.transform.position + new Vector3(0, 0, 3.0f);
+        Gate.transform.position = NewGatePos;
+    }
 
 
 }
