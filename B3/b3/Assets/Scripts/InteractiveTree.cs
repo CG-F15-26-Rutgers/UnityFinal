@@ -23,7 +23,11 @@ public class InteractiveTree : MonoBehaviour {
     public Transform pickUpSlab;
     public Transform lovePoemMarker;
 
-    public Collider trigger;
+    public Canvas canvas;
+    public Text E;
+    public Text HeartText;
+    public Text GemText;
+    public Text KeyText;
 
     //Pick up slab
     public FullBodyBipedEffector Effector;
@@ -56,11 +60,15 @@ public class InteractiveTree : MonoBehaviour {
 
     private BehaviorAgent theAgent;
     private bool hasTreasure = false;
+    private bool hasHeart = false;
+    private bool hasGem = true;
     private bool gotInfo = false;
     private bool gateOpen = false;
+    private bool inTrigger = false;
     
 	// Use this for initialization
 	void Start () {
+        E.text = "";
         //theAgent = new BehaviorAgent(this.HeroTree());
         //BehaviorManager.Instance.Register(theAgent);
         //theAgent.StartBehavior();
@@ -68,7 +76,7 @@ public class InteractiveTree : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+
 	}
 
     /*
@@ -78,87 +86,8 @@ public class InteractiveTree : MonoBehaviour {
             this.Think());
     }
     */
+    
 
-    void OnTriggerEnter(Collider trigger)
-    {
-        if(trigger.gameObject.tag == "PrincessConvoTrigger" )
-        {
-            theAgent = new BehaviorAgent(this.PrincessInfo());
-            BehaviorManager.Instance.Register(theAgent);
-            theAgent.StartBehavior();
-            gotInfo = true;
-        }
-
-        else if(trigger.gameObject.tag == "OldManConvoTrigger")
-        {
-            theAgent = new BehaviorAgent(this.OldGuyInfo());
-            BehaviorManager.Instance.Register(theAgent);
-            theAgent.StartBehavior();
-            gotInfo = true;
-        }
-
-        else if(trigger.gameObject.tag == "PickUpSlabTrigger")
-        {
-            theAgent = new BehaviorAgent(this.ST_PickUpTablet());
-            BehaviorManager.Instance.Register(theAgent);
-            theAgent.StartBehavior();
-            gotInfo = true;
-        }
-
-        else if(trigger.gameObject.tag == "PickUpTreasureTrigger")
-        {
-            if(gotInfo)
-            {
-                theAgent = new BehaviorAgent(this.ST_OpenTreasureChest());
-                BehaviorManager.Instance.Register(theAgent);
-                theAgent.StartBehavior();
-                hasTreasure = true;
-            }
-        }
-
-        else if(trigger.gameObject.tag == "PickUpHeartTrigger")
-        {
-            if(gotInfo)
-            {
-                theAgent = new BehaviorAgent(this.PrincessInfo());
-                BehaviorManager.Instance.Register(theAgent);
-                theAgent.StartBehavior();
-                this.PrincessInfo();
-                this.ST_PickUpLovePoem();
-            }
-        }
-
-        else if(trigger.gameObject.tag == "PickUpFountain")
-        {
-            theAgent = new BehaviorAgent(this.ST_PickUpFountain());
-            BehaviorManager.Instance.Register(theAgent);
-            theAgent.StartBehavior();
-            this.ST_PickUpFountain();
-            gotInfo = true;
-        }
-
-        else if(trigger.gameObject.tag == "UnlockGate")
-        {
-            if(hasTreasure)
-            {
-                theAgent = new BehaviorAgent(this.ST_UnlockGate());
-                BehaviorManager.Instance.Register(theAgent);
-                theAgent.StartBehavior();
-                this.ST_UnlockGate();
-            }
-        }
-
-        else if(trigger.gameObject.tag == "PickUpDiamond")
-        {
-            if(gateOpen)
-            {
-                theAgent = new BehaviorAgent(this.ST_PickUpGem());
-                BehaviorManager.Instance.Register(theAgent);
-                theAgent.StartBehavior();
-            }
-        }
-
-    }
 
     //
     //Root of the Love Poem Arc

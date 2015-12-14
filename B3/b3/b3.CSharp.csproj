@@ -242,17 +242,14 @@
     <Compile Include="Assets\KADAPT\Assets\Core\Scripts\Util\Token.cs" />
     <Compile Include="Assets\KADAPT\Assets\Core\Scripts\Util\Tuple.cs" />
     <Compile Include="Assets\KADAPT\Assets\MyBehaviorTree.cs" />
-    <Compile Include="Assets\Scripts\AnimThing.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\HeroTree.cs" />
     <Compile Include="Assets\Scripts\InteractiveTree.cs" />
-    <Compile Include="Assets\Scripts\KeyboardController.cs" />
     <Compile Include="Assets\Scripts\MainBehavior.cs" />
     <Compile Include="Assets\Scripts\Opengate.cs" />
-    <Compile Include="Assets\Scripts\PersonController.cs" />
     <Compile Include="Assets\Scripts\RotateItem.cs" />
     <Compile Include="Assets\Scripts\SmoothFollow.cs" />
-    <Compile Include="Assets\Scripts\TapToMove.cs" />
+    <Compile Include="Assets\Scripts\Trigger.cs" />
     <Compile Include="Assets\Scripts\takegem.cs" />
     <Compile Include="Assets\Textures\Fantasy Skybox FREE\Scripts\FSPlayer.cs" />
   </ItemGroup>
