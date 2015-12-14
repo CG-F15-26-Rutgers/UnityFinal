@@ -2,6 +2,7 @@
 using System.Collections;
 using TreeSharpPlus;
 using RootMotion.FinalIK;
+using UnityEngine.UI;
 
 public class HeroTree : MonoBehaviour {
 
@@ -23,6 +24,12 @@ public class HeroTree : MonoBehaviour {
     public Transform lovePoemMarker;
 
     public Collider trigger;
+
+    public Canvas Menu;
+    public Button Replay;
+    public Button MainMenu;
+
+    public bool complete = false;
 
     //Pick up slab
     public FullBodyBipedEffector Effector;
@@ -67,6 +74,7 @@ public class HeroTree : MonoBehaviour {
     }
 	
 	void Update () {
+
 	}
 
     //
@@ -372,6 +380,7 @@ public class HeroTree : MonoBehaviour {
             this.PrincessWave()
             );
 
+        complete = true;
         return new Sequence(new LeafWait(500), lookEyeCamera, new LeafWait(500), dance, new LeafWait(500), goodbye);
     }
 
@@ -438,6 +447,5 @@ public class HeroTree : MonoBehaviour {
         Vector3 NewGatePos = Gate.transform.position + new Vector3(0, 0, 3.0f);
         Gate.transform.position = NewGatePos;
     }
-
 
 }

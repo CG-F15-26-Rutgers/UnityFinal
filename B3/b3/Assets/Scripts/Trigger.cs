@@ -17,6 +17,7 @@ public class Trigger : MonoBehaviour {
     public Text FountainTalk;
     public Text SlabTalk;
     public Text KeyTalk;
+    public Text LockedTalk;
     public GameObject Panel;
     public GameObject Princess;
     public GameObject OldMan;
@@ -53,6 +54,7 @@ public class Trigger : MonoBehaviour {
         FountainTalk.text = "";
         SlabTalk.text = "";
         KeyTalk.text = "";
+        LockedTalk.text = "";
     }
 
     void Update()
@@ -103,6 +105,13 @@ public class Trigger : MonoBehaviour {
             {
                 E.text = "";
                 UnlockGate();
+            }
+        }
+        if(!hasKey)
+        {
+            if(Input.GetKeyDown(KeyCode.E) && inTriggerGate)
+            {
+                LockedTalk.text = "I think I need a key to open this.";
             }
         }
 
@@ -215,6 +224,7 @@ public class Trigger : MonoBehaviour {
         FountainTalk.text = "";
         SlabTalk.text = "";
         KeyTalk.text = "";
+        LockedTalk.text = "";
     }
 
 
