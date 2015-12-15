@@ -111,6 +111,7 @@ public class Trigger : MonoBehaviour {
         {
             if(Input.GetKeyDown(KeyCode.E) && inTriggerGate)
             {
+                Panel.SetActive(true);
                 LockedTalk.text = "I think I need a key to open this.";
             }
         }
