@@ -1,8 +1,13 @@
 ﻿using UnityEngine;
+using UnityStandardAssets.Characters.FirstPerson;
 using System.Collections;
 
 public class SwapCameras : MonoBehaviour
 {
+
+	void Start(){
+		camSwap(1);
+	}
 
     void Update()
     {
@@ -10,33 +15,29 @@ public class SwapCameras : MonoBehaviour
         {
             camSwap(1);
         }
-        if (Input.GetKey("2"))
+        else if (Input.GetKey("2"))
         {
             camSwap(2);
         }
-        if (Input.GetKey("3"))
+        else if (Input.GetKey("3"))
         {
             camSwap(3);
         }
-        if (Input.GetKey("4"))
+        else if (Input.GetKey("4"))
         {
             camSwap(4);
         }
-        if (Input.GetKey("5"))
+        else if (Input.GetKey("5"))
         {
             camSwap(5);
         }
-        if (Input.GetKey("6"))
+        else if (Input.GetKey("6"))
         {
             camSwap(6);
         }
-        if (Input.GetKey("7"))
+        else if (Input.GetKey("7"))
         {
             camSwap(7);
-        }
-        if (Input.GetKey("8"))
-        {
-            camSwap(8);
         }
    
     }
@@ -44,6 +45,7 @@ public class SwapCameras : MonoBehaviour
     void camSwap(int currentCam)
     {
         GameObject[] cameras = GameObject.FindGameObjectsWithTag("MainCamera");
+		GameObject[] daniels = GameObject.FindGameObjectsWithTag("Player");
 
         foreach (GameObject cams in cameras)
         {
@@ -51,8 +53,24 @@ public class SwapCameras : MonoBehaviour
             theCam.enabled = false;
         }
 
-        string oneToUse = "Camera" + currentCam;
-        Camera usedCam = GameObject.Find(oneToUse).GetComponent<Camera>() as Camera;
+		foreach (GameObject dan in daniels){
+			dan.GetComponent<FirstPersonController>().Disable();
+		}
+
+        string cameraToUse = "Camera" + currentCam;
+		string danToUse = "Daniel" + currentCam;
+        Camera usedCam = GameObject.Find(cameraToUse).GetComponent<Camera>() as Camera;
         usedCam.enabled = true;
+
+		
+
+		if (currentCam == 1)
+			GameObject.Find("Hero").GetComponent<FirstPersonController>().Enable();
+		else if (currentCam == 2)
+			GameObject.Find("Princess").GetComponent<FirstPersonController>().Enable();
+		else if (currentCam == 3)
+			GameObject.Find("OldMan").GetComponent<FirstPersonController>().Enable();
+		else
+			GameObject.Find(danToUse).GetComponent<FirstPersonController>().Enable();
     }
 }
