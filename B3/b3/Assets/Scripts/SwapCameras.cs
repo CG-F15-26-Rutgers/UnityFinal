@@ -39,6 +39,10 @@ public class SwapCameras : MonoBehaviour
         {
             camSwap(7);
         }
+		else if (Input.GetKey("8"))
+        {
+            camSwap(8);
+        }
    
     }
 
