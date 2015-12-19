@@ -1,10 +1,6 @@
 using UnityEngine;
 using System.Collections;
-
-
-
-
-
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class UnitySteeringController : SteeringController
 {
@@ -77,32 +73,44 @@ public class UnitySteeringController : SteeringController
 
     void Update()
     {
-        this.HandleOrientation();
-        this.lastPosition = transform.position;
+		if (this.GetComponent<FirstPersonController>().Active()){
+			this.maxSpeed = 0.0f;
+			this.minSpeed = 0.0f;
+			this.navAgent.speed = 0.0f;
+		}
+		
+		else{
+			this.maxSpeed = 2.2f;
+			this.minSpeed = 0.5f;
+			this.navAgent.speed = this.maxSpeed;
+			
+			this.HandleOrientation();
+			this.lastPosition = transform.position;
 
-        this.navAgent.height = this.height;
-        this.navAgent.radius = this.radius;
-        this.navAgent.acceleration = this.acceleration;
-        this.navAgent.stoppingDistance = this.stoppingRadius;
+			this.navAgent.height = this.height;
+			this.navAgent.radius = this.radius;
+			this.navAgent.acceleration = this.acceleration;
+			this.navAgent.stoppingDistance = this.stoppingRadius;
 
-        if (this.navAgent.enabled == true)
-        {
-            float remaining = navAgent.remainingDistance;
-            if (this.SlowArrival == true && remaining <= this.arrivingRadius)
-            {
-                float speed = this.maxSpeed
-                    * (remaining / this.arrivingRadius);
-                if (speed < minSpeed)
-                    speed = minSpeed;
-                this.navAgent.speed = speed;
-            }
-            else
-            {
-                this.navAgent.speed = this.maxSpeed;
-            }
-        }
-    }
-
+			if (this.navAgent.enabled == true)
+			{
+				float remaining = navAgent.remainingDistance;
+				if (this.SlowArrival == true && remaining <= this.arrivingRadius)
+				{
+					float speed = this.maxSpeed
+						* (remaining / this.arrivingRadius);
+					if (speed < minSpeed)
+						speed = minSpeed;
+					this.navAgent.speed = speed;
+				}
+				else
+				{
+					this.navAgent.speed = this.maxSpeed;
+				}
+			}
+		}
+	}
+	
     public override bool IsAtTarget()
     {
         return (transform.position - this.target).magnitude 
